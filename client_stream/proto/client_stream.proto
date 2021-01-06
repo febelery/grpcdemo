@@ -1,0 +1,17 @@
+syntax = "proto3";
+package proto;
+option go_package = ".;rpcdemo";
+
+message StreamRequest {
+  string stream_data = 1;
+}
+
+message SimpleResponse {
+  int32  code = 1;
+  string value = 2;
+}
+
+service StreamClient {
+  // 客户端流式rpc，在请求的参数前添加stream
+  rpc RouteList(stream StreamRequest) returns (SimpleResponse) {};
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+package proto;
+option go_package = ".;rpcdemo";
+
+// 下载 https://github.com/protocolbuffers/protobuf/releases
+// 将include/google 目录复制到/usr/local/include
+// protoc -I=. -I=/usr/local/include -I=${GOPATH}/pkg/mod/github.com/mwitkow/go-proto-validators@v0.3.2 -I=${GOPATH}/pkg/mod/github.com/grpc-ecosystem/grpc-gateway/v2@v2.0.1/third_party/googleapis --govalidators_out=. --grpc-gateway_out=logtostderr=true:.  --go_out=plugins=grpc:./ ./*.proto
+import "validator.proto";
+import "google/api/annotations.proto";
+
+
+enum Action {
+  ALLOW = 0;
+  DENY = 1;
+  CHILL = 2;
+}
+
+message SimpleRequest {
+  string data = 1 [(validator.field) = {regex: "^[a-z]{2,20}$"}];
+  string user_id = 2 [(validator.field) = {uuid_ver:4}];
+  Action do = 3 [(validator.field) = {is_in_enum : true}];
+}
+
+message SimpleResponse {
+  int32 code = 1;
+  string value = 2;
+}
+
+service Simple {
+  rpc Route (SimpleRequest) returns (SimpleResponse){
+    option (google.api.http) = {
+      post: "/v1/route"
+      body: "*"
+    };
+  };
+}
+
+
